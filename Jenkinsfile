@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools{
-        maven 'flamy-maven'
+        maven "MAVEN"
     }
 
     stages {
