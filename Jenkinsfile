@@ -1,15 +1,9 @@
 pipeline {
     agent any
     tools{
-        maven 'dinesh-maven'
+        maven 'flamy-maven'
     }
-    environment {
-                AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
-                SONAR_TOKEN = credentials('sonarcloud-credentials')
-                DOCKER_LOGIN_JFROG = credentials('JF_ACCESS_TOKEN')
-                DOCKER_IMAGE_NAME = "stacknexus.jfrog.io/docker-local/hello-frog:1.0.0"
-            }
+
     stages {
         stage ('Packer init') {
             steps {
@@ -39,15 +33,7 @@ pipeline {
                     sh '/usr/bin/packer build aws-ami.pkr.hcl'
             }  
         }
-        stage ('Sonarcloud scan') {
-            steps {
-                script {
-                    echo 'scanning code'
-                    env.SONAR_TOKEN = "${SONAR_TOKEN}"
-                    sh 'mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=my-awesome-group3334827_packer_ami_and_petclininc'
-                }
-            }  
-        }
+        
         stage ('Build jar') {
             steps {
                 script {
@@ -60,21 +46,10 @@ pipeline {
             steps {
                 script {
                     echo 'Building docker image'
-                            sh "docker build -t shivanishivani/java-app:$BUILD_NUMBER ."
+                            sh "docker build -t petclinic-java-app:$BUILD_NUMBER ."
                      }
                 }
         }  
-        stage ('Push to dockerhub') {
-            steps {
-                script {
-                    echo 'Pushing to dockerhub'
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                            sh "echo $PASS | docker login -u $USER --password-stdin"
-                            sh "docker push shivanishivani/java-app:$BUILD_NUMBER"
-                      }
-                }
-            }  
-        }
-        
+                
     }
 }
