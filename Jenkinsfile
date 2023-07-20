@@ -1,8 +1,9 @@
 pipeline {
-    agent any
-    tools{
-        label "petclinic"
-    }
+  agent any
+  tools {
+    maven 'Maven-3.9.1'
+    jdk 'open-jdk17'
+  }
 
     stages {
         stage ('Packer init') {
